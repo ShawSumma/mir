@@ -1,0 +1,10 @@
+{
+	"files.associations": {
+		"*.dump": "plaintext",
+		"*.mak": "makefile",
+		"*.make": "makefile",
+		".run": "fish",
+		"*.asm": "plaintext",
+		"scan-sieve.h": "c"
+	}
+}

@@ -1,0 +1,22 @@
+M0:	module
+proto0:	proto	d:d0_n
+proto1:	proto	i32, i32:i0_x, i32:i0_y
+	import	print
+add:	func	i32, i32:i0_x, i32:i0_y
+	local	i64:i_0
+# 2 args, 1 local
+	adds	i_0, i0_x, i0_y
+	ret	i_0
+	endfunc
+	export	add
+main:	func	i32
+	local	i64:i_0, d:d_1, i64:I_2
+# 0 args, 3 locals
+	call	proto1, add, i_0, 10, 20
+	ext32	I_2, i_0
+	i2d	d_1, I_2
+	call	proto0, print, d_1
+	ret	0
+	endfunc
+	export	main
+	endmodule
