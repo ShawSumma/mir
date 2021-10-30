@@ -42,8 +42,9 @@ static void out_op3 (MIR_context_t ctx, FILE *f, MIR_op_t *ops, const char *str)
 
 static void out_jmp (MIR_context_t ctx, FILE *f, MIR_op_t label_op) {
   mir_assert (label_op.mode == MIR_OP_LABEL);
-  fprintf (f, "goto ");
+  fprintf (f, "do goto ");
   out_op (ctx, f, label_op);
+  fprintf (f, " end");
 }
 
 static void out_cmp (MIR_context_t ctx, FILE *f, MIR_op_t *ops, const char *str) {
@@ -226,6 +227,7 @@ static void out_insn (MIR_context_t ctx, FILE *f, MIR_insn_t insn) {
   }
   case MIR_JMP: {
     out_jmp(ctx, f, ops[0]);
+    fprintf (f, "\n");
     break;
   }
   case MIR_BT: { 
@@ -333,18 +335,32 @@ static void out_insn (MIR_context_t ctx, FILE *f, MIR_insn_t insn) {
     break;
   }
   case MIR_RET: {
-    fprintf (f, "return ");
+    fprintf (f, "do return ");
     if (insn->nops == 0) {
       fprintf (f, "none");
     } else {
       out_op (ctx, f, ops[0]);
     }
-    fprintf (f, "\n");
+    fprintf (f, " end\n");
     break;
   }
-  case MIR_LABEL: printf ("unk: %i", (int) insn->code);
-  default: mir_assert (FALSE);
+  case MIR_LABEL: {
+    fprintf (f, "::l%i::\n", (int) ops[0].u.i);
+    break;
   }
+  default: printf ("unk: %i\n", (int) insn->code); mir_assert (FALSE);
+  }
+}
+
+void out_def (MIR_context_t ctx, FILE *f, MIR_item_t item) {
+  MIR_var_t var;
+  size_t i, nlocals;
+
+  if (item->item_type == MIR_export_item) return;
+  if (item->item_type == MIR_import_item) return;
+  if (item->item_type == MIR_forward_item) return;
+  if (item->item_type == MIR_proto_item) return;
+  fprintf (f, "local %s\n", item->u.func->name);
 }
 
 void out_item (MIR_context_t ctx, FILE *f, MIR_item_t item) {
@@ -356,8 +372,7 @@ void out_item (MIR_context_t ctx, FILE *f, MIR_item_t item) {
   if (item->item_type == MIR_forward_item) return;
   if (item->item_type == MIR_proto_item) return;
   curr_func = item->u.func;
-  fprintf (f, "function ");
-  fprintf (f, "%s(", curr_func->name);
+  fprintf (f, "%s = function(", curr_func->name);
   for (i = 0; i < curr_func->nargs; i++) {
     if (i != 0) fprintf (f, ", ");
     var = VARR_GET (MIR_var_t, curr_func->vars, i);
@@ -380,7 +395,11 @@ void out_item (MIR_context_t ctx, FILE *f, MIR_item_t item) {
 void MIR_module2lua (MIR_context_t ctx, FILE *f, MIR_module_t m) {
   for (MIR_item_t item = DLIST_HEAD (MIR_item_t, m->items); item != NULL;
        item = DLIST_NEXT (MIR_item_t, item))
+    out_def (ctx, f, item);
+  for (MIR_item_t item = DLIST_HEAD (MIR_item_t, m->items); item != NULL;
+       item = DLIST_NEXT (MIR_item_t, item))
     out_item (ctx, f, item);
+  fprintf (f, "main(0, 0)");
 }
 
 DEF_VARR (char);

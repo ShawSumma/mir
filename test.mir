@@ -1,21 +1,30 @@
 M0:	module
-proto0:	proto	d:d0_n
-proto1:	proto	i32, i32:i0_x, i32:i0_y
+proto0:	proto	i32, i32:i0_n
+proto1:	proto	i32, ...
 	import	print
-add:	func	i32, i32:i0_x, i32:i0_y
-	local	i64:i_0
-# 2 args, 1 local
-	adds	i_0, i0_x, i0_y
-	ret	i_0
+fib:	func	i32, i32:i0_n
+	local	i64:i_0, i64:i_1, i64:i_2, i64:i_3, i64:i_4, i64:i_5
+# 1 arg, 6 locals
+	bges	L2, i0_n, 2
+L1:
+	ret	i0_n
+	jmp	L3
+L2:
+	subs	i_2, i0_n, 2
+	call	proto0, fib, i_1, i_2
+	subs	i_4, i0_n, 1
+	call	proto0, fib, i_3, i_4
+	adds	i_5, i_1, i_3
+	ret	i_5
+L3:
+	ret	0
 	endfunc
-	export	add
+	export	fib
 main:	func	i32
-	local	i64:i_0, d:d_1, i64:I_2
-# 0 args, 3 locals
-	call	proto1, add, i_0, 10, 20
-	ext32	I_2, i_0
-	i2d	d_1, I_2
-	call	proto0, print, d_1
+	local	i64:i_0, i64:i_1
+# 0 args, 2 locals
+	call	proto0, fib, i_1, 40
+	call	proto1, print, i_0, i_1
 	ret	0
 	endfunc
 	export	main

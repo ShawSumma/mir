@@ -1,11 +1,8 @@
 
-default: conv conv2
+default: conv
 
 conv: mir mir2lua
 	$(CC) ./build/mir.o mir2lua/mir2lua.c -I. -o ./build/mir2lua -g3
-
-conv2: mir mir2lua
-	$(CC) ./build/mir.o mir2lua/mir2lua2.c -I. -o ./build/mir2c
 
 mir: .dummy
 	@mkdir -p ./build
